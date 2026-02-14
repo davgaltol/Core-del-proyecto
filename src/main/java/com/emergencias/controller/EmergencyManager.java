@@ -5,6 +5,9 @@ import com.emergencias.alert.EmergencyLogger;
 import com.emergencias.detector.EmergencyDetector;
 import com.emergencias.model.EmergencyEvent;
 import com.emergencias.model.UserData;
+import com.emergencias.model.CentroSalud;
+import com.emergencias.model.CentroSaludUtils;
+import java.util.List;
 import com.emergencias.services.IAlert;
 import java.util.Scanner;
 
@@ -49,9 +52,11 @@ public class EmergencyManager {
                 try {
                     // Paso 1: Detectar emergencia a través del detector
                     EmergencyEvent event = detector.detectEmergency();
-                    
+
                     // Si se detectó una emergencia válida
                     if (event != null) {
+                        // Mostrar centros de salud de Murcia justo antes de la confirmación de éxito
+                        String ubicacion = event.getLocation();
                         try {
                             // Paso 2: Registrar la emergencia en el log
                             String emergencyId = logger.logEmergency(event);
@@ -63,11 +68,32 @@ public class EmergencyManager {
                             if (alertSent) {
                                 // Paso 4: Notificar a los contactos de emergencia
                                 alertSender.notifyContacts(userData, event);
-                            
+
+                                // Solo si la ubicación contiene 'murcia', preguntar y mostrar los centros
+                                if (ubicacion != null && ubicacion.toLowerCase().contains("murcia")) {
+                                    System.out.print("\n¿Quieres ver todos los centros de salud de Murcia? (S/N): ");
+                                    String verCentros = scanner.nextLine().trim();
+                                    if (verCentros.equalsIgnoreCase("S")) {
+                                        List<CentroSalud> centros = CentroSaludUtils.cargarCentros("src/main/resources/CentrosdeSaludMurcia.json");
+                                        if (centros != null) {
+                                            int count = 0;
+                                            System.out.println("\n=== TODOS LOS CENTROS DE SALUD DE LA REGIÓN DE MURCIA ===");
+                                            for (CentroSalud centro : centros) {
+                                                System.out.println("- " + centro.getNombre() + " | " + centro.getDireccion() + " | Municipio: " + centro.getMunicipio() + " | Tel: " + centro.getTelefono());
+                                                count++;
+                                            }
+                                            if (count == 0) {
+                                                System.out.println("[DEBUG] No se encontraron centros en el archivo.");
+                                            }
+                                            System.out.println("==================================\n");
+                                        }
+                                    }
+                                }
+
                                 // Confirmación al usuario
                                 System.out.println("\n✅ ¡Emergencia reportada con éxito!");
                                 System.out.println("Se ha creado un registro de la emergencia en el sistema.");
-                                
+
                                 // Paso 5: Solicitar feedback del usuario
                                 try {
                                     logger.collectAndLogFeedback(emergencyId, scanner);

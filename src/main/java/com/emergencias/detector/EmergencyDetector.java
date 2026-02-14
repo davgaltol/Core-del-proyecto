@@ -88,21 +88,18 @@ public class EmergencyDetector {
                 case "5":
                     return "Otro";
                 default:
-                    System.out.println("⚠️  Opción no válida. Debe ingresar un número entre 1 y 5. Intente nuevamente.");
+                    System.out.println("Opción no válida. Debe ingresar un número entre 1 y 5. Intente nuevamente.");
             }
         }
     }
 
     private String getLocation() {
-        System.out.print("\nUbicación actual (o presione Enter para usar ubicación por GPS): ");
+        System.out.print("\nUbicación actual (o presione Enter para usar 'Murcia' por defecto): ");
         String location = scanner.nextLine().trim();
-        
         if (location.isEmpty()) {
-            // Simular obtención de ubicación por GPS
-            System.out.println("ℹ️  Usando ubicación por GPS...");
-            return "40.4168° N, 3.7038° O (Plaza Mayor, Madrid)";
+            System.out.println("Ubicación por defecto: Murcia");
+            return "Murcia";
         }
-        
         return location;
     }
 
